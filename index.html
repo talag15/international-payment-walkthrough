@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Paying a London supplier £1,000 · International payments on Unit</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --surface: #ffffff; --surface-2: #f0f0ed; --text: #1c1c1e; --text-2: #55555c; --text-3: #8a8a92;
+    --line: #e2e2de; --line-2: #cfcfca; --accent: #2e6fd8; --accent-soft: #e6efff; --on-accent: #ffffff;
+    --green: #1f8a65; --green-soft: #e3f4ec; --amber: #b7791f; --amber-soft: #fbf1df; --red: #c0392b; --red-soft: #fbe6e3;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141416; --surface: #1c1c1f; --surface-2: #242428; --text: #ececee; --text-2: #b0b0b8; --text-3: #7c7c86;
+      --line: #2e2e33; --line-2: #3d3d44; --accent: #5b93f0; --accent-soft: #1f2c44; --on-accent: #0d1220;
+      --green: #4cc493; --green-soft: #183027; --amber: #e0a84a; --amber-soft: #33291a; --red: #ec7464; --red-soft: #3a1f1c;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 24px 60px; }
+  header .eyebrow { font-size: 12px; color: var(--text-3); letter-spacing: .02em; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 6px 0 8px; letter-spacing: -.01em; }
+  h2 { font-size: 19px; margin: 0 0 4px; }
+  .lede { color: var(--text-2); max-width: 760px; margin: 0; }
+  .tabs { display: flex; gap: 6px; margin: 22px 0 18px; border-bottom: 1px solid var(--line); }
+  .tab { appearance: none; border: 0; background: none; color: var(--text-2); font: inherit; font-weight: 600; padding: 10px 14px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+  .panel { display: none; } .panel.active { display: block; }
+
+  .deal { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 18px; }
+  .deal .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .stat .v { font-size: 22px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .stat .l { font-size: 12px; color: var(--text-3); }
+  .stat.green .v { color: var(--green); } .stat.blue .v { color: var(--accent); }
+
+  /* Stage */
+  .stage { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px 20px 18px; }
+  .stage-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .phase-tag { font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 3px 10px; border-radius: 999px; }
+  .status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-3); }
+  .status b { color: var(--text); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-3); display: inline-block; transition: background .3s; }
+
+  .track-area { position: relative; height: 270px; margin-top: 6px; }
+  .track { position: absolute; top: 84px; left: 12.5%; width: 75%; height: 2px; background: var(--line-2); border-radius: 2px; }
+  .seg { position: absolute; top: 83px; height: 4px; background: var(--accent); border-radius: 2px; transition: left .5s ease, width .5s ease, opacity .3s; }
+  .chip { position: absolute; top: 4px; transform: translateX(-50%); white-space: nowrap; padding: 6px 14px; border-radius: 999px; font-weight: 650; font-size: 13px; z-index: 3; border: 1px solid var(--line-2); background: var(--surface); color: var(--text); }
+  .chip.money { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .chip.moving { transition: left .95s cubic-bezier(.45,0,.2,1); }
+  .chip.pop { animation: pop .5s ease; }
+  @keyframes pop { 0% { transform: translateX(-50%) scale(1); } 40% { transform: translateX(-50%) scale(1.12); } 100% { transform: translateX(-50%) scale(1); } }
+  .stations { position: absolute; top: 56px; left: 0; right: 0; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); }
+  .station { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+  .avatar { width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; background: var(--surface); border: 2px solid var(--line-2); color: var(--text-2); transition: all .3s; position: relative; z-index: 2; }
+  .station.active .avatar { border-color: var(--accent); background: var(--accent-soft); color: var(--text); }
+  .station .name { font-weight: 650; }
+  .station .sub { font-size: 12px; color: var(--text-3); margin-top: -4px; }
+  .bal { margin-top: 4px; min-width: 160px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); transition: all .35s; }
+  .bal .bl { font-size: 11px; color: var(--text-3); }
+  .bal .bv { font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .bal.changed { border-color: var(--accent); background: var(--accent-soft); }
+  .bal.changed .bv { color: var(--accent); }
+
+  .caption { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 14px; align-items: start; padding: 14px 16px; border-radius: 10px; background: var(--surface-2); margin-top: 6px; }
+  .num { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .caption .t { font-weight: 650; font-size: 16px; }
+  .caption .d { color: var(--text-2); }
+  .api-toggle { margin-top: 8px; display: inline-flex; gap: 8px; align-items: center; font-size: 13px; color: var(--text-2); cursor: pointer; user-select: none; }
+  .api-toggle code { font-family: var(--mono); font-size: 12px; background: var(--surface); border: 1px solid var(--line); padding: 1px 7px; border-radius: 5px; color: var(--text); }
+  pre { margin: 8px 0 0; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; font: 12px/1.55 var(--mono); color: var(--text-2); overflow-x: auto; }
+  .hidden { display: none !important; }
+
+  .controls { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+  .btns { display: flex; gap: 8px; }
+  button.b { font: inherit; font-size: 14px; font-weight: 600; padding: 8px 14px; border-radius: 8px; cursor: pointer; border: 1px solid var(--line-2); background: var(--surface); color: var(--text); }
+  button.b:disabled { opacity: .4; cursor: default; }
+  button.b.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); min-width: 150px; }
+  .dots { display: flex; gap: 6px; align-items: center; }
+  .pdot { width: 9px; height: 9px; border-radius: 5px; background: var(--line-2); cursor: pointer; transition: all .25s; border: 0; padding: 0; }
+  .pdot.done { background: var(--accent); opacity: .55; }
+  .pdot.cur { width: 26px; background: var(--accent); opacity: 1; }
+  .hint { font-size: 12px; color: var(--text-3); }
+  kbd { font: 11px var(--mono); border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; }
+
+  /* Reference tab */
+  .ref-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .muted { color: var(--text-3); font-size: 13px; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-2); margin: 6px 0 10px; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; border: 2px solid var(--c); }
+  svg text { font-family: inherit; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; color: var(--text-3); font-weight: 600; }
+  td .ev { font-family: var(--mono); font-size: 11.5px; color: var(--text-3); }
+  .tag { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+  .notes { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 22px; }
+  .note { border-left: 3px solid var(--c); background: var(--surface); border-radius: 8px; padding: 12px 14px; border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .note b { display: block; margin-bottom: 4px; }
+  .note p { margin: 0; color: var(--text-2); font-size: 13.5px; }
+  footer { margin-top: 28px; font-size: 12px; color: var(--text-3); max-width: 900px; }
+
+  @media (max-width: 820px) {
+    .deal, .notes { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .ref-grid { grid-template-columns: 1fr; }
+    .bal { min-width: 0; width: 92%; } .bal .bv { font-size: 13px; }
+    .station .sub { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">International payments on Unit · Illustrative business scenario</div>
+    <h1>Paying a London supplier £1,000 from a US business account</h1>
+    <p class="lede">Blue Bottle Coffee (Oakland, California) owes its UK supplier, Union Hand-Roasted Coffee (London), £1,000 for a shipment of green coffee. Follow the payment from sign-up to the moment the pounds reach Union's bank.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-tab="tour">Guided tour</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="ref">Flowchart &amp; reference</button>
+  </div>
+
+  <section class="panel active" id="panel-tour">
+    <div class="deal">
+      <div class="stat green"><div class="v">£1,000.00</div><div class="l">Union receives</div></div>
+      <div class="stat"><div class="v">0.74</div><div class="l">GBP per 1 USD (locked rate)</div></div>
+      <div class="stat"><div class="v">$15.00</div><div class="l">Transfer fee (example)</div></div>
+      <div class="stat blue"><div class="v">$1,366.35</div><div class="l">Blue Bottle pays in total</div></div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-top">
+        <span class="phase-tag" id="phase">One-time setup</span>
+        <div class="status">Payment status <span class="dot" id="statusDot"></span><b id="statusText">Not started</b></div>
+      </div>
+
+      <div class="track-area">
+        <div class="track"></div>
+        <div class="seg" id="seg"></div>
+        <div class="chip" id="chip"></div>
+        <div class="stations" id="stations"></div>
+      </div>
+
+      <div class="caption">
+        <div class="num" id="num">1</div>
+        <div>
+          <div class="t" id="title"></div>
+          <div class="d" id="desc"></div>
+          <div class="api-toggle" id="apiToggle"><span id="apiArrow">▸</span> Show the API call <code id="apiLabel"></code></div>
+          <pre id="apiCode" class="hidden"></pre>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="btns">
+          <button class="b" id="back">Back</button>
+          <button class="b primary" id="play">Play the journey</button>
+          <button class="b" id="next">Next</button>
+        </div>
+        <div class="dots" id="dots"></div>
+        <div class="hint"><kbd>←</kbd> <kbd>→</kbd> to step · <kbd>Space</kbd> to play · <kbd>A</kbd> to show API</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-ref">
+    <div class="ref-grid">
+      <div class="card">
+        <h2>The end-to-end flow</h2>
+        <div class="muted">Steps 1 and 2 happen once. Steps 3 to 5 repeat for every invoice.</div>
+        <div class="legend">
+          <span style="--c: var(--green)">Successful outcome</span>
+          <span style="--c: var(--amber)">Needs attention</span>
+          <span style="--c: var(--red)">Declined</span>
+          <span style="--c: var(--accent)">Decision</span>
+        </div>
+        <div id="flow"></div>
+      </div>
+      <div>
+        <div class="card">
+          <h2>The API calls, in order</h2>
+          <table>
+            <thead><tr><th>#</th><th>Call</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><code>POST /product-applications</code></td><td>One-time application for international payments. Nium verifies the business, and Unit opens a USD wallet for it.</td></tr>
+              <tr><td>2</td><td><code>POST /counterparties</code></td><td>Saves Union's bank details (SWIFT code and IBAN) once.</td></tr>
+              <tr><td>3</td><td><code>POST /quotes</code></td><td>Locks a rate for £1,000 and returns the dollar total.</td></tr>
+              <tr><td>4</td><td><code>POST /payments</code></td><td>Uses the quote to debit $1,366.35 and start delivery.</td></tr>
+              <tr><td>5</td><td><span class="muted">Automatic</span></td><td>Unit and Nium fund, convert and pay out. The app is notified by webhook.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h2>Payment status Blue Bottle sees</h2>
+          <table>
+            <tbody>
+              <tr><td><span class="tag" style="background:var(--accent)"></span><b>Pending</b><div class="ev">payment.created</div></td><td>Money left Blue Bottle's account; conversion and delivery are in progress.</td></tr>
+              <tr><td><span class="tag" style="background:var(--amber)"></span><b>Pending review</b><div class="ev">payment.pendingReview</div></td><td>Nium's compliance team asked for more information.</td></tr>
+              <tr><td><span class="tag" style="background:var(--green)"></span><b>Sent</b><div class="ev">payment.sent</div></td><td>£1,000 has been sent to Union's account at Barclays.</td></tr>
+              <tr><td><span class="tag" style="background:var(--red)"></span><b>Rejected</b><div class="ev">payment.rejected</div></td><td>Declined at creation (for example, low balance). Nothing was debited.</td></tr>
+              <tr><td><span class="tag" style="background:var(--text-3)"></span><b>Returned</b><div class="ev">handled by operations</div></td><td>The UK bank sent the funds back, for example because of a wrong IBAN.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <div class="note" style="--c: var(--accent)"><b>The price is locked, briefly</b><p>A quote holds the rate for a set time, from 5 minutes to 24 hours depending on the provider. If it expires, the app requests a new one.</p></div>
+      <div class="note" style="--c: var(--green)"><b>No double payments</b><p>Each request carries an idempotency key, and a quote can be used only once. A retry or double-click never pays Union twice.</p></div>
+      <div class="note" style="--c: var(--amber)"><b>Exceptions are handled by people today</b><p>If money comes back after the debit (a return, or a failed conversion or funding), Unit's operations team resolves it.</p></div>
+    </div>
+  </section>
+
+  <footer>Illustrative scenario. Company names are used only to make the example concrete; this is not a real transaction. The rate is fixed at 1 USD = 0.74 GBP for the example and the $15.00 fee is a sample; actual fees and markups are set per platform. The IBAN is the standard published example and all IDs are placeholders.</footer>
+</div>
+
+<script>
+const STATIONS = [
+  { id: "bb", initials: "BB", name: "Blue Bottle Coffee", sub: "Oakland, CA · sender", label: "Checking account" },
+  { id: "unit", initials: "U", name: "Unit", sub: "Banking platform", label: "Cross-border operating acct" },
+  { id: "nium", initials: "N", name: "Nium", sub: "FX & payout partner", label: "Blue Bottle's Nium wallet" },
+  { id: "union", initials: "UH", name: "Union Hand-Roasted", sub: "London · Barclays", label: "Barclays account" },
+];
+
+const START = { bb: "$25,000.00", unit: "$0.00", nium: "—", union: "£0.00" };
+const AFTER_SETUP = { bb: "$25,000.00", unit: "$0.00", nium: "$0.00", union: "£0.00" };
+
+const STEPS = [
+  {
+    phase: "One-time setup", title: "Get approved for international payments",
+    desc: "Blue Bottle answers a short questionnaire in its banking app: company size, why it pays abroad (suppliers), and where (the UK). Nium verifies the business, and Unit opens a USD wallet for it at Nium.",
+    from: "bb", to: "nium", chip: "Application", kind: "message", bal: AFTER_SETUP, status: "Not started",
+    api: "POST /product-applications",
+    code: `{
+  "data": {
+    "type": "internationalPaymentsBusinessProductApplication",
+    "attributes": {
+      "idempotencyKey": "bluebottle-intl-onboarding-2026",
+      "numberOfEmployees": "Over500",
+      "annualRevenue": "Over5m",
+      "businessVertical": ["OnlineRetailFoodAndBeverage"],
+      "intendedUses": ["SupplierAndVendorPayments"],
+      "companyOwnershipStructure": "Direct",
+      "expectedTransactionVolumes": { ... "countries": ["GB"] },
+      "deviceDetails": { ... }
+    },
+    "relationships": {
+      "customer": { "data": { "type": "businessCustomer", "id": "1180342" } }
+    }
+  }
+}`
+  },
+  {
+    phase: "One-time setup", title: "Save the vendor's bank details",
+    desc: "The finance team saves Union Hand-Roasted as a payee using the details on its invoice: Barclays SWIFT code and IBAN. Unit registers Union with Nium, so it can be paid again any time.",
+    from: "bb", to: "unit", chip: "Union's bank details", kind: "message", bal: AFTER_SETUP, status: "Not started",
+    api: "POST /counterparties",
+    code: `{
+  "data": {
+    "type": "swiftCounterparty",
+    "attributes": {
+      "type": "Business",
+      "name": "Union Hand-Roasted Coffee Ltd",
+      "country": "GB",
+      "currency": "GBP",
+      "bic": "BUKBGB22",
+      "accountNumber": "GB33BUKB20201555555555",
+      "address": { "country": "GB", "city": "London" },
+      "idempotencyKey": "bluebottle-vendor-union-handroasted"
+    },
+    "relationships": { "customer": { "data": { "type": "customer", "id": "1180342" } } }
+  }
+}`
+  },
+  {
+    phase: "Every invoice", title: "The invoice arrives",
+    desc: "Union Hand-Roasted bills Blue Bottle £1,000 for a shipment of green coffee.",
+    from: "union", to: "bb", chip: "Invoice · £1,000", kind: "message", bal: AFTER_SETUP, status: "Not started"
+  },
+  {
+    phase: "Every invoice", title: "Ask for a price",
+    desc: "The app asks Unit what £1,000 costs. Unit gets a live rate from Nium and locks it: 1 USD = 0.74 GBP, so $1,351.35, plus a $15 fee, for $1,366.35 in total.",
+    from: "bb", to: "unit", chip: "Quote · $1,366.35", kind: "message", bal: AFTER_SETUP, status: "Quote locked",
+    api: "POST /quotes",
+    code: `// Request: fix the pound side (100000 pence = £1,000.00)
+{ "data": { "type": "quote",
+    "attributes": { "idempotencyKey": "bluebottle-union-inv-1104-quote", "destinationAmount": 100000 },
+    "relationships": {
+      "customer":     { "data": { "type": "customer", "id": "1180342" } },
+      "counterparty": { "data": { "type": "counterparty", "id": "84211" } } } } }
+
+// Response
+{ "data": { "type": "quote", "id": "530912",
+    "attributes": { "status": "New", "exchangeRate": 0.74,
+      "sourceCurrency": "USD", "sourceAmount": 135135,
+      "destinationCurrency": "GBP", "destinationAmount": 100000,
+      "feeAmount": 1500, "totalAmount": 136635,
+      "expiresAt": "2026-11-10T12:19:00Z" } } }`
+  },
+  {
+    phase: "Every invoice", title: "Pay with one click",
+    desc: "Blue Bottle accepts the quote. Unit debits $1,366.35 in one go: the $15 fee goes to revenue and $1,351.35 is set aside for the transfer. If the balance were too low, the payment would be rejected and nothing would move.",
+    from: "bb", to: "unit", chip: "$1,366.35", kind: "money",
+    bal: { bb: "$23,633.65", unit: "$1,351.35", nium: "$0.00", union: "£0.00" }, status: "Pending",
+    api: "POST /payments",
+    code: `{ "data": { "type": "internationalPayment",
+    "attributes": {
+      "purpose": "GeneralGoodsTrades",
+      "sourceOfFunds": "CorporateAccount",
+      "description": "Union Hand-Roasted invoice 1104 - green coffee",
+      "idempotencyKey": "bluebottle-union-inv-1104-payment" },
+    "relationships": {
+      "quote":   { "data": { "type": "quote", "id": "530912" } },
+      "account": { "data": { "type": "depositAccount", "id": "2209871" } } } } }
+
+// Response: status "Pending"  ·  Webhooks: payment.created, quote.used`
+  },
+  {
+    phase: "Automatic", title: "Fund the transfer",
+    desc: "Unit sends $1,351.35 to Blue Bottle's wallet at Nium by ACH. Nium starts the currency conversion at the same time.",
+    from: "unit", to: "nium", chip: "$1,351.35 · ACH", kind: "money",
+    bal: { bb: "$23,633.65", unit: "$0.00", nium: "$1,351.35", union: "£0.00" }, status: "Pending"
+  },
+  {
+    phase: "Automatic", title: "Dollars become pounds",
+    desc: "Nium converts $1,351.35 to exactly £1,000 at the rate locked earlier. Market moves since the quote don't change the amount.",
+    from: "nium", to: "nium", chip: "$1,351.35 → £1,000", kind: "money",
+    bal: { bb: "$23,633.65", unit: "$0.00", nium: "£1,000.00", union: "£0.00" }, status: "Pending"
+  },
+  {
+    phase: "Automatic", title: "Pounds land in London",
+    desc: "Once the wallet is funded and the conversion is done, Nium pays £1,000 into Union's Barclays account. Union receives the full invoice amount.",
+    from: "nium", to: "union", chip: "£1,000.00", kind: "money",
+    bal: { bb: "$23,633.65", unit: "$0.00", nium: "£0.00", union: "£1,000.00" }, status: "Sent"
+  },
+  {
+    phase: "Automatic", title: "Everyone is notified",
+    desc: "Nium confirms delivery. Unit marks the payment Sent and tells Blue Bottle's app, which shows the finance team that the invoice is paid.",
+    from: "unit", to: "bb", chip: "Paid", kind: "message",
+    bal: { bb: "$23,633.65", unit: "$0.00", nium: "£0.00", union: "£1,000.00" }, status: "Sent",
+    api: "webhook payment.sent",
+    code: `{ "data": [{ "type": "payment.sent",
+    "relationships": { "payment": { "data": { "type": "payment", "id": "77310455" } } } }] }`
+  },
+];
+
+const $ = (id) => document.getElementById(id);
+const pct = (id) => 12.5 + 25 * STATIONS.findIndex((s) => s.id === id);
+let idx = 0, playing = false, timer = null, showApi = false;
+
+$("stations").innerHTML = STATIONS.map((s) => `
+  <div class="station" id="st-${s.id}">
+    <div class="avatar">${s.initials}</div>
+    <div class="name">${s.name}</div>
+    <div class="sub">${s.sub}</div>
+    <div class="bal" id="bal-${s.id}"><div class="bl">${s.label}</div><div class="bv"></div></div>
+  </div>`).join("");
+
+$("dots").innerHTML = STEPS.map((s, i) => `<button class="pdot" title="${s.title}" data-i="${i}"></button>`).join("");
+document.querySelectorAll(".pdot").forEach((d) => d.addEventListener("click", () => { stop(); go(+d.dataset.i); }));
+
+function render(animate) {
+  const s = STEPS[idx];
+  const prevBal = idx > 0 ? STEPS[idx - 1].bal : START;
+  $("phase").textContent = s.phase;
+  $("num").textContent = idx + 1;
+  $("title").textContent = s.title;
+  $("desc").textContent = s.desc;
+  $("statusText").textContent = s.status;
+  $("statusDot").style.background = s.status === "Sent" ? "var(--green)" : s.status === "Pending" ? "var(--accent)" : s.status === "Quote locked" ? "var(--amber)" : "var(--text-3)";
+
+  const hasApi = !!s.api;
+  $("apiToggle").classList.toggle("hidden", !hasApi);
+  $("apiLabel").textContent = s.api || "";
+  $("apiCode").textContent = s.code || "";
+  $("apiCode").classList.toggle("hidden", !(hasApi && showApi));
+  $("apiArrow").textContent = showApi ? "▾" : "▸";
+
+  STATIONS.forEach((st) => {
+    $("st-" + st.id).classList.toggle("active", st.id === s.from || st.id === s.to);
+    const el = $("bal-" + st.id);
+    el.querySelector(".bv").textContent = s.bal[st.id];
+    el.classList.toggle("changed", prevBal[st.id] !== s.bal[st.id]);
+  });
+
+  const a = pct(s.from), b = pct(s.to);
+  const seg = $("seg");
+  seg.style.left = Math.min(a, b) + "%";
+  seg.style.width = Math.abs(b - a) + "%";
+  seg.style.opacity = a === b ? 0 : 1;
+
+  const chip = $("chip");
+  chip.textContent = s.chip;
+  chip.className = "chip" + (s.kind === "money" ? " money" : "");
+  if (animate && a !== b) {
+    chip.style.left = a + "%";
+    void chip.offsetWidth;
+    chip.classList.add("moving");
+    chip.style.left = b + "%";
+  } else {
+    chip.style.left = b + "%";
+    if (animate) { void chip.offsetWidth; chip.classList.add("pop"); }
+  }
+
+  document.querySelectorAll(".pdot").forEach((d, i) => d.className = "pdot" + (i === idx ? " cur" : i < idx ? " done" : ""));
+  $("back").disabled = idx === 0;
+  $("next").disabled = idx === STEPS.length - 1;
+  $("play").textContent = playing ? "Pause" : idx === STEPS.length - 1 ? "Replay" : "Play the journey";
+}
+
+function go(i) { idx = Math.max(0, Math.min(STEPS.length - 1, i)); render(true); }
+function stop() { playing = false; clearTimeout(timer); render(false); }
+function tick() {
+  if (!playing) return;
+  if (idx >= STEPS.length - 1) { playing = false; render(false); return; }
+  go(idx + 1);
+  timer = setTimeout(tick, 3600);
+}
+function togglePlay() {
+  if (playing) return stop();
+  if (idx >= STEPS.length - 1) { idx = 0; render(true); }
+  playing = true; render(false);
+  timer = setTimeout(tick, 2600);
+}
+
+$("back").onclick = () => { stop(); go(idx - 1); };
+$("next").onclick = () => { stop(); go(idx + 1); };
+$("play").onclick = togglePlay;
+$("apiToggle").onclick = () => { showApi = !showApi; render(false); };
+document.addEventListener("keydown", (e) => {
+  if (!$("panel-tour").classList.contains("active")) return;
+  if (e.key === "ArrowRight") { stop(); go(idx + 1); }
+  else if (e.key === "ArrowLeft") { stop(); go(idx - 1); }
+  else if (e.key === " ") { e.preventDefault(); togglePlay(); }
+  else if (e.key.toLowerCase() === "a") { showApi = !showApi; render(false); }
+});
+
+document.querySelectorAll(".tab").forEach((t) => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", String(x === t)));
+  document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + t.dataset.tab));
+  if (t.dataset.tab !== "tour") stop();
+}));
+
+render(false);
+
+// Flowchart
+(function drawFlow() {
+  const W = 760, NW = 230, NH = 50, RH = 72, C = 380;
+  const nodes = [
+    { id: "apply", r: 0, x: C, t: "Apply for international payments", s: "POST /product-applications", k: "step", who: "Blue Bottle", phase: "1 · Get approved" },
+    { id: "kyb", r: 1, x: C, t: "Business is verified (KYB)", s: "Nium checks, reports back", k: "step", who: "Nium" },
+    { id: "approved", r: 2, x: C, t: "Approved · USD wallet opened", s: "Cross-border enabled", k: "success", who: "Unit" },
+    { id: "vendor", r: 3, x: C, t: "Save UK vendor's bank details", s: "POST /counterparties", k: "step", who: "Blue Bottle", phase: "2 · Add the vendor" },
+    { id: "quote", r: 4, x: C, t: "Get a locked quote for £1,000", s: "POST /quotes", k: "step", who: "Blue Bottle", phase: "3 · Lock the price" },
+    { id: "pay", r: 5, x: C, t: "Send the payment", s: "POST /payments", k: "step", who: "Blue Bottle", phase: "4 · Pay" },
+    { id: "check", r: 6, x: C, t: "Enough balance?", s: "Checked at debit time", k: "decision", who: "Unit" },
+    { id: "rejected", r: 7, x: 140, t: "Rejected · no money moves", s: "payment.rejected", k: "danger", who: "Unit" },
+    { id: "debit", r: 7, x: 470, t: "$1,366.35 debited · Pending", s: "payment.created · quote.used", k: "step", who: "Unit" },
+    { id: "convert", r: 8, x: 330, t: "Convert USD to GBP", s: "At the locked 0.74 rate", k: "step", who: "Nium", phase: "5 · Deliver" },
+    { id: "fund", r: 8, x: 600, t: "Fund wallet · $1,351.35", s: "ACH from Unit to Nium", k: "step", who: "Unit" },
+    { id: "transfer", r: 9, x: 470, t: "Pay out £1,000 to the vendor", s: "When funded + converted", k: "step", who: "Nium" },
+    { id: "rfi", r: 10, x: 230, t: "Compliance question", s: "Pending review (optional)", k: "warning", who: "Nium" },
+    { id: "sent", r: 11, x: 470, t: "Sent to Barclays · £1,000", s: "payment.sent", k: "success", who: "Barclays" },
+  ];
+  const edges = [["apply","kyb"],["kyb","approved"],["approved","vendor"],["vendor","quote"],["quote","pay"],["pay","check"],
+    ["check","rejected","No"],["check","debit","Yes"],["debit","convert"],["debit","fund"],["convert","transfer"],["fund","transfer"],
+    ["transfer","rfi"],["transfer","sent"],["rfi","sent"]];
+  const stroke = { step: "var(--line-2)", success: "var(--green)", warning: "var(--amber)", danger: "var(--red)", decision: "var(--accent)" };
+  const fill = { step: "var(--surface)", success: "var(--green-soft)", warning: "var(--amber-soft)", danger: "var(--red-soft)", decision: "var(--accent-soft)" };
+  const by = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  const top = 14, LABEL = 110;
+  const y = (r) => top + r * RH;
+  const H = y(11) + NH + 16;
+  let svg = `<svg viewBox="0 0 ${W + LABEL} ${H}" width="100%" style="display:block">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--text-3)"/></marker></defs>`;
+  nodes.filter((n) => n.phase).forEach((n, i) => {
+    if (i > 0) svg += `<line x1="0" x2="${W + LABEL}" y1="${y(n.r) - 11}" y2="${y(n.r) - 11}" stroke="var(--line)" stroke-dasharray="3 4"/>`;
+    svg += `<text x="4" y="${y(n.r) + 18}" font-size="12" font-weight="650" fill="var(--text-2)">${n.phase}</text>`;
+  });
+  svg += `<g transform="translate(${LABEL - 20},0)">`;
+  edges.forEach(([f, t, label]) => {
+    const a = by[f], b = by[t];
+    const x1 = a.x, y1 = y(a.r) + NH, x2 = b.x, y2 = y(b.r) - 2, my = (y1 + y2) / 2;
+    svg += `<path d="M${x1} ${y1} C${x1} ${my}, ${x2} ${my}, ${x2} ${y2}" fill="none" stroke="var(--line-2)" stroke-width="1.4" marker-end="url(#ar)"/>`;
+    if (label) svg += `<text x="${(x1 + x2) / 2 + (x2 < x1 ? -24 : 10)}" y="${my + 4}" font-size="11" font-weight="700" fill="var(--text-2)">${label}</text>`;
+  });
+  nodes.forEach((n) => {
+    const x = n.x - NW / 2, yy = y(n.r);
+    svg += `<g><rect x="${x}" y="${yy}" width="${NW}" height="${NH}" rx="${n.k === "decision" ? 25 : 8}" fill="${fill[n.k]}" stroke="${stroke[n.k]}" stroke-width="${n.k === "step" ? 1 : 1.6}"/>
+      <text x="${x + 12}" y="${yy + 21}" font-size="12.5" font-weight="650" fill="var(--text)">${n.t}</text>
+      <text x="${x + 12}" y="${yy + 38}" font-size="11" fill="var(--text-3)">${n.s}</text>
+      <text x="${x + NW - 10}" y="${yy + 38}" font-size="10" text-anchor="end" fill="var(--text-3)">${n.who}</text></g>`;
+  });
+  svg += `</g></svg>`;
+  $("flow").innerHTML = svg;
+})();
+</script>
+</body>
+</html>
